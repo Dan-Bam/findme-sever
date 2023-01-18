@@ -1,15 +1,15 @@
 server:
-  port: 8082
+  port: 8081
 
 spring:
   datasource:
-    url: jdbc:mysql://${DB_HOST}:${DB_PORT}/${DB_NAME}?useUnicode=true&characterEncoding=utf8&useJDBCCompliantTimezoneShift=true&useLegacyDatetimeCode=false&serverTimezone=UTC
+    url: ${DB_URL}
     username: ${DB_USER}
     password: ${DB_PASSWORD}
     driver-class-name: com.mysql.cj.jdbc.Driver
   jpa:
     hibernate:
-      ddl-auto: update
+      ddl-auto: ${DDL_AUTO}
   redis:
     host: ${REDIS_HOST}
     port: ${REDIS_PORT}
@@ -26,12 +26,13 @@ jwt:
 coolsms:
   access: ${COOLSMS_ACCESS}
   secret: ${COOLSMS_SECRET}
+  phone: ${COOLSMS_PHONE}
 
 cloud:
   aws:
     credentials:
-        accessKey: ${S3_ACCESS}
-        secretKey: ${S3_SECRET}
+      accessKey: ${S3_ACCESS}
+      secretKey: ${S3_SECRET}
     s3:
       bucket: ${S3_BUCKET}
     region:
@@ -47,3 +48,17 @@ logging:
           InstanceMetadataServiceResourceFetcher: error
         util:
           EC2MetadataUtils: error
+    com.project.findme.infrastructure.feign: debug
+
+feign:
+  client:
+    config:
+      default:
+        logger-level: full
+
+socket:
+  port: 8082
+
+messages:
+  basename: i18n/exception
+  encoding: UTF-8
