@@ -2,6 +2,8 @@ package com.project.findme.global.security;
 
 import com.project.findme.global.filter.ExceptionHandlerFilter;
 import com.project.findme.global.filter.JwtRequestFilter;
+import com.project.findme.global.security.handler.CustomAccessDeniedHandler;
+import com.project.findme.global.security.handler.CustomAuthenticationEntryPointHandler;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -29,11 +31,13 @@ public class SecurityConfig {
                 .httpBasic().disable();
         http
                 .authorizeRequests()
-                .antMatchers(
-                        "/auth/**"
-                ).permitAll()
-                .anyRequest().authenticated();
-
+                .antMatchers(HttpMethod.POST, "/auth/**").permitAll()
+                .antMatchers(HttpMethod.PATCH, "/auth/**").permitAll()
+                .anyRequest().denyAll()
+                .and()
+                .exceptionHandling()
+                .accessDeniedHandler(new CustomAccessDeniedHandler())
+                .authenticationEntryPoint(new CustomAuthenticationEntryPointHandler());
         http
                 .sessionManagement()
                 .sessionCreationPolicy(SessionCreationPolicy.STATELESS);
