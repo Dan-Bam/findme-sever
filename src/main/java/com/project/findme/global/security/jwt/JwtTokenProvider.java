@@ -27,8 +27,7 @@ public class JwtTokenProvider {
     private final JwtKeyProperties jwtKeyProperties;
     private final AuthDetailService authDetailService;
 
-    private final long ACCESS_TOKEN_EXPIRED_TIME = 2 * 60 * 1000; // 2시간
-    private final long REFRESH_TOKEN_EXPIRED_TIME = 7 * 24 * 60 * 60 * 1000; // 1주
+    private final long ACCESS_TOKEN_EXPIRED_TIME = 2 * 60 * 60 * 1000; // 2시간
 
     @AllArgsConstructor
     enum TokenType {
@@ -39,7 +38,7 @@ public class JwtTokenProvider {
     }
 
     private Key getSignInKey(String secretKey) {
-        byte keyByte[] = secretKey.getBytes(StandardCharsets.UTF_8);
+        byte[] keyByte = secretKey.getBytes(StandardCharsets.UTF_8);
         return Keys.hmacShaKeyFor(keyByte);
     }
 
@@ -70,14 +69,14 @@ public class JwtTokenProvider {
 
         return Jwts.builder()
                 .setClaims(claims)
-                .setIssuedAt(new Date((System.currentTimeMillis())))
+                .setIssuedAt(new Date())
                 .setExpiration(new Date(System.currentTimeMillis() + expireTime))
                 .signWith(getSignInKey(jwtKeyProperties.getKey()))
                 .compact();
     }
 
     public LocalDateTime getExpiredTime() {
-        return LocalDateTime.now().plusSeconds(ACCESS_TOKEN_EXPIRED_TIME/1000);
+        return LocalDateTime.now().plusSeconds(ACCESS_TOKEN_EXPIRED_TIME / 1000);
     }
 
     public String generateAccessToken(String id) {
@@ -85,12 +84,13 @@ public class JwtTokenProvider {
     }
 
     public String generateRefreshToken(String id) {
+        // 1주
+        long REFRESH_TOKEN_EXPIRED_TIME = 7 * 24 * 60 * 60 * 1000;
         return doGenerateToken(id, TokenType.REFRESH_TOKEN, REFRESH_TOKEN_EXPIRED_TIME);
     }
 
     public Authentication authentication(String token) {
-        UserDetails userDetails = authDetailService
-                .loadUserByUsername(getUserId(token));
+        UserDetails userDetails = authDetailService.loadUserByUsername(getUserId(token));
         return new UsernamePasswordAuthenticationToken(userDetails, "", userDetails.getAuthorities());
     }
 
